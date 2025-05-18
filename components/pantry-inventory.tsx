@@ -19,30 +19,23 @@ export default function PantryInventory() {
   const [isAdding, setIsAdding] = useState(false)
   const [isClient, setIsClient] = useState(false)
 
-  // Set isClient to true once component mounts
   useEffect(() => {
     setIsClient(true)
-  }, [])
-
-  // Load items from localStorage on mount
-  useEffect(() => {
     const savedItems = localStorage.getItem("pantryItems")
     if (savedItems) {
       setItems(JSON.parse(savedItems))
     }
   }, [])
 
-  // Save items to localStorage when they change
   useEffect(() => {
-    if (isClient) {
-      localStorage.setItem("pantryItems", JSON.stringify(items))
-    }
+    if (!isClient) return
+    localStorage.setItem("pantryItems", JSON.stringify(items))
   }, [items, isClient])
 
   const addItem = () => {
     if (newItem.trim()) {
       const newItemObject = {
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: crypto.randomUUID(),
         name: newItem.trim(),
         inStock: true,
       }
@@ -62,7 +55,6 @@ export default function PantryInventory() {
 
   const filteredItems = items.filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
 
-  // Don't render anything until we confirm we're on the client
   if (!isClient) {
     return null
   }

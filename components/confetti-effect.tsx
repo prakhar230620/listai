@@ -17,9 +17,15 @@ interface ConfettiPiece {
 export default function ConfettiEffect({ duration = 3000 }: ConfettiProps) {
   const [pieces, setPieces] = useState<ConfettiPiece[]>([])
   const [show, setShow] = useState(false)
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
-    // Generate random confetti pieces only on the client side
+    setIsClient(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isClient) return
+
     const colors = [
       "bg-pink-500",
       "bg-purple-500",
@@ -40,15 +46,14 @@ export default function ConfettiEffect({ duration = 3000 }: ConfettiProps) {
     setPieces(newPieces)
     setShow(true)
 
-    // Hide confetti after duration
     const timer = setTimeout(() => {
       setShow(false)
     }, duration)
 
     return () => clearTimeout(timer)
-  }, [duration]) // Only run once on mount and when duration changes
+  }, [duration, isClient])
 
-  if (!show) return null
+  if (!isClient || !show) return null
 
   return (
     <div className="confetti-container">

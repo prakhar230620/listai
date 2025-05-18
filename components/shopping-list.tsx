@@ -27,13 +27,13 @@ export default function ShoppingList({ ingredients }: ShoppingListProps) {
   const [isAllChecked, setIsAllChecked] = useState(false)
   const [isClient, setIsClient] = useState(false)
 
-  // Set isClient to true once component mounts
   useEffect(() => {
     setIsClient(true)
   }, [])
 
-  // Check if all items are checked
   useEffect(() => {
+    if (!isClient) return
+
     if (ingredients.length > 0 && checkedItems.size === ingredients.length && !isAllChecked) {
       setIsAllChecked(true)
       setShowConfetti(true)
@@ -43,7 +43,7 @@ export default function ShoppingList({ ingredients }: ShoppingListProps) {
     } else if (checkedItems.size !== ingredients.length) {
       setIsAllChecked(false)
     }
-  }, [checkedItems, ingredients.length, isAllChecked])
+  }, [checkedItems, ingredients.length, isAllChecked, isClient])
 
   const toggleItem = (index: number) => {
     const newCheckedItems = new Set(checkedItems)
@@ -51,8 +51,7 @@ export default function ShoppingList({ ingredients }: ShoppingListProps) {
     if (newCheckedItems.has(index)) {
       newCheckedItems.delete(index)
     } else {
-      // Add haptic feedback if available
-      if (typeof navigator !== "undefined" && navigator.vibrate) {
+      if (isClient && navigator.vibrate) {
         navigator.vibrate(50)
       }
       newCheckedItems.add(index)
@@ -62,12 +61,14 @@ export default function ShoppingList({ ingredients }: ShoppingListProps) {
   }
 
   const handlePrint = () => {
-    if (typeof window !== "undefined") {
+    if (isClient) {
       window.print()
     }
   }
 
   const handleDownload = () => {
+    if (!isClient) return
+
     const content = `${listName}\n\n${ingredients
       .map((i, index) => {
         const checked = checkedItems.has(index) ? "[✓] " : "[ ] "
@@ -87,6 +88,8 @@ export default function ShoppingList({ ingredients }: ShoppingListProps) {
   }
 
   const handleShare = async () => {
+    if (!isClient) return
+
     const content = `${listName}\n\n${ingredients
       .map((i, index) => {
         const checked = checkedItems.has(index) ? "✓ " : "• "
@@ -94,7 +97,7 @@ export default function ShoppingList({ ingredients }: ShoppingListProps) {
       })
       .join("\n")}`
 
-    if (typeof navigator !== "undefined" && navigator.share) {
+    if (navigator.share) {
       try {
         await navigator.share({
           title: listName,
@@ -117,7 +120,6 @@ export default function ShoppingList({ ingredients }: ShoppingListProps) {
     setCheckedItems(allItems)
   }
 
-  // Don't render anything until we confirm we're on the client
   if (!isClient) {
     return null
   }

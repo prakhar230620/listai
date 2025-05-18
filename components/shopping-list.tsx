@@ -25,6 +25,12 @@ export default function ShoppingList({ ingredients }: ShoppingListProps) {
   const [listName, setListName] = useState("My Shopping List")
   const [isEditing, setIsEditing] = useState(false)
   const [isAllChecked, setIsAllChecked] = useState(false)
+  const [isClient, setIsClient] = useState(false)
+
+  // Set isClient to true once component mounts
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   // Check if all items are checked
   useEffect(() => {
@@ -46,7 +52,7 @@ export default function ShoppingList({ ingredients }: ShoppingListProps) {
       newCheckedItems.delete(index)
     } else {
       // Add haptic feedback if available
-      if (navigator.vibrate) {
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
         navigator.vibrate(50)
       }
       newCheckedItems.add(index)
@@ -56,7 +62,9 @@ export default function ShoppingList({ ingredients }: ShoppingListProps) {
   }
 
   const handlePrint = () => {
-    window.print()
+    if (typeof window !== "undefined") {
+      window.print()
+    }
   }
 
   const handleDownload = () => {
@@ -86,7 +94,7 @@ export default function ShoppingList({ ingredients }: ShoppingListProps) {
       })
       .join("\n")}`
 
-    if (navigator.share) {
+    if (typeof navigator !== "undefined" && navigator.share) {
       try {
         await navigator.share({
           title: listName,
@@ -107,6 +115,11 @@ export default function ShoppingList({ ingredients }: ShoppingListProps) {
   const checkAllItems = () => {
     const allItems = new Set(ingredients.map((_, index) => index))
     setCheckedItems(allItems)
+  }
+
+  // Don't render anything until we confirm we're on the client
+  if (!isClient) {
+    return null
   }
 
   return (

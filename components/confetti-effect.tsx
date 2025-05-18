@@ -7,12 +7,19 @@ interface ConfettiProps {
   duration?: number
 }
 
+interface ConfettiPiece {
+  id: number
+  color: string
+  x: number
+  delay: number
+}
+
 export default function ConfettiEffect({ duration = 3000 }: ConfettiProps) {
-  const [pieces, setPieces] = useState<Array<{ id: number; color: string; x: number; delay: number }>>([])
+  const [pieces, setPieces] = useState<ConfettiPiece[]>([])
   const [show, setShow] = useState(true)
 
   useEffect(() => {
-    // Generate random confetti pieces
+    // Generate random confetti pieces only on the client side
     const colors = [
       "bg-pink-500",
       "bg-purple-500",
@@ -26,8 +33,8 @@ export default function ConfettiEffect({ duration = 3000 }: ConfettiProps) {
     const newPieces = Array.from({ length: 50 }, (_, i) => ({
       id: i,
       color: colors[Math.floor(Math.random() * colors.length)],
-      x: Math.random() * 100, // random horizontal position
-      delay: Math.random() * 0.5, // random delay
+      x: Math.random() * 100,
+      delay: Math.random() * 0.5,
     }))
 
     setPieces(newPieces)
@@ -38,7 +45,7 @@ export default function ConfettiEffect({ duration = 3000 }: ConfettiProps) {
     }, duration)
 
     return () => clearTimeout(timer)
-  }, [duration])
+  }, [duration]) // Only run once on mount and when duration changes
 
   if (!show) return null
 
@@ -52,22 +59,22 @@ export default function ConfettiEffect({ duration = 3000 }: ConfettiProps) {
             top: -20,
             left: `${piece.x}vw`,
             opacity: 1,
-            scale: Math.random() * 0.6 + 0.4,
+            scale: 0.5,
           }}
           animate={{
             top: "100vh",
-            rotate: Math.random() * 360,
+            rotate: 360,
             opacity: 0,
           }}
           transition={{
-            duration: Math.random() * 2 + 1,
+            duration: 2,
             delay: piece.delay,
             ease: "easeOut",
           }}
           style={{
-            width: `${Math.random() * 10 + 5}px`,
-            height: `${Math.random() * 10 + 5}px`,
-            borderRadius: Math.random() > 0.5 ? "50%" : "0",
+            width: "10px",
+            height: "10px",
+            borderRadius: "50%",
           }}
         />
       ))}
